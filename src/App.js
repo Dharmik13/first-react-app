@@ -1,25 +1,25 @@
-import "./App.css";
-// import { Routes, Route, Link, BrowserRouter } from "react-router-dom";
-import { BrowserRouter as Router, Route } from 'react-router-dom';
-import { HomePage } from "./HomePage";
-import { Apple } from "./Apple";
-import { NotFound } from "./NotFound";
+import './App.css';
+import { HomePage } from './Components/HomePage';
+import { Route, Routes, Link, BrowserRouter } from 'react-router-dom';
+import { Apple } from './Components/Apple';
+import { NotFound } from './Components/NotFound';
 
-const App = () => (
+const App = () => {
+  return (
   <BrowserRouter>
-    <div>
-      <Link to="/" style={{ marginLeft: 7, }}>Home</Link>
-      <Link to="/apple" style={{ marginLeft: 10, }}>Apple</Link>
-    </div>
-
-    <Routes>
-      <Route Path="/" element={<HomePage />}></Route>
-      <Route Path="/apple" element={<Apple />}></Route>
-    </Routes>
-    <NotFound />
-
+      <div>
+        <Link to="/" style={{marginleft: 5,}}> Home </Link>
+        <Link to="/apple" style={{marginleft: 15,}}> Apple </Link>
+        <Link to="/applet" style={{marginleft: 30,}}> Applet </Link>
+      </div>
+      <Routes>
+        <Route path='/' element={<HomePage />}></Route>
+        <Route path='/apple' element={<Apple />}></Route>
+        <Route path='*' element={<NotFound />}></Route>
+      </Routes>
+        
   </BrowserRouter>
-
-);
+  );
+}
 
 export default App;
