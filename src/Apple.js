@@ -1,43 +1,37 @@
-import { Avatar, Button, Popover, TextField } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-// import LogoutIcon from "@mui/icons-material/Logout";
+
+import Button from "@mui/material/Button";
+import { useState, useEffect } from "react";
+import TextField from "@mui/material/TextField";
+import { Avatar, Popover } from "@mui/material";
+import LogoutOutlinedIcon from "@mui/icons-material/LogoutOutlined";
 import { Formik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
-import { ToastContainer, toast } from 'react-toastify';
+import { toast } from "react-toastify";
+import { useUserContext } from "./UserContext";
 
 export const Apple = () => {
-  // const [name, setName] = useState("");
-  // const [email, setEmail] = useState("");
+  // const [name, setName] = useState();
+  // const [email, setEmail] = useState();
   const [open, setOpen] = useState(false);
-  const [anchorE1, setAnchorE1] = useState(null);
-  const [user, setUser] = useState();
-
+  const [anchorEl, setAnchorEl] = useState(null);
   const Navigate = useNavigate();
-
-  // const onHomebtnClick = () => {
-  //   console.log("Button Clicked");
-  //   console.log("Name: ", name);
-  //   console.log("Email: ", email);
-  //   Navigate("/");
-  // };
+  const [user, setUser] = useState([]);
+  const { setUserName } = useUserContext();
 
   useEffect(() => {
     axios.get("https://jsonplaceholder.typicode.com/posts").then((res) => {
-      console.log("user detail: ", res.data);
+      console.log("User detail: ", res.data);
       setUser(res.data);
     });
   }, []);
 
-
-
   const validationSchema = Yup.object().shape({
-    name: Yup.string().min(
-      3,
-      "Please make sure you have entered you name with atleast 3 char."
-    ),
-    email: Yup.string().email("Please enter a valid email address"),
+    name: Yup.string()
+      .min(3, "Please make sure you have entered you name with at least 3 char.")
+      .required("Please enter your name"),
+    email: Yup.string().email("Please enter a valid email address").required("Please enter email address"),
   });
 
   const initialValues = {
@@ -45,19 +39,36 @@ export const Apple = () => {
     email: "",
   };
 
-  const onFormSubmit = (values) => {
+  const onFormSubmit = async (values) => {
     console.log("On the form submitted", values);
-    // alert("Form Submmited"); 
 
     const requestData = {
       userName: values.name,
       userEmail: values.email,
     };
 
-    axios.post("https://jsonplaceholder.typicode.com/posts", requestData).then((res) => {
-      if (res.status === 201) {
-        console.log(res.data.id);
-        toast.success("API call is completed successfully", {
+    setUserName(values.name);
+
+    // call API to post submit the form
+    const res = await axios.post("https://jsonplaceholder.typicode.com/posts", requestData);
+
+    if (res.status === 201) {
+      console.log(res.data.id);
+      toast.success("API call is completted successfully", {
+        position: "top-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+      });
+    }
+
+    axios.delete("https://jsonplaceholder.typicode.com/posts/1").then((res) => {
+      if (res.status === 200) {
+        toast.success("Data is deleted successfully", {
           position: "top-right",
           autoClose: 3000,
           hideProgressBar: false,
@@ -71,36 +82,23 @@ export const Apple = () => {
     });
   };
 
-  axios.delete("https://jsonplaceholder.typicode.com/posts/1").then((res) => {
-    if (res.status === 200) {
-      console.log(res.data.id);
-      toast.success("Data is deleted successfully", {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "light",
-      });
-    }
-  });
-
   const handleClick = (event) => {
     console.log(123);
-    setAnchorE1(event.currentTarget);
+    setAnchorEl(event.currentTarget);
     setOpen(true);
   };
 
   const handleClose = () => {
-    setAnchorE1(null);
+    setAnchorEl(null);
     setOpen(false);
   };
 
   return (
-    <div style={{ padding: 5 }}>
-      {/* <div>Apple 🍎</div> */}
+    <div
+      style={{
+        padding: 5,
+      }}
+    >
       <div
         style={{
           display: "flex",
@@ -117,10 +115,9 @@ export const Apple = () => {
             columnGap: 5,
           }}
         >
-          <Avatar sx={{ bgcolor: "blue" }}>NM</Avatar>
+          <Avatar sx={{ bgcolor: "blue" }}>DP</Avatar>
         </div>
       </div>
-
       <div
         style={{
           padding: 5,
@@ -129,20 +126,8 @@ export const Apple = () => {
           rowGap: 8,
         }}
       >
-        <Formik
-          initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={onFormSubmit}
-        >
-          {({
-            value,
-            errors,
-            touched,
-            isSubmitting,
-            handleChange,
-            handleBlur,
-            handleSubmit,
-          }) => (
+        <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={onFormSubmit}>
+          {({ value, errors, touched, isSubmitting, handleChange, handleBlur, handleSubmit }) => (
             <form onSubmit={handleSubmit}>
               <div
                 style={{
@@ -156,6 +141,7 @@ export const Apple = () => {
                   type="text"
                   label="Name"
                   id="name"
+                  name="name"
                   placeholder="Name"
                   onChange={handleChange}
                   onBlur={handleBlur}
@@ -186,11 +172,11 @@ export const Apple = () => {
                   type="email"
                   label="Email"
                   id="email"
+                  name="email"
                   placeholder="email"
                   onChange={handleChange}
                   onBlur={handleBlur}
                 />
-
                 {touched.email && (
                   <span
                     style={{
@@ -211,30 +197,14 @@ export const Apple = () => {
           )}
         </Formik>
       </div>
+      <div>
+        {user.map((item) => (
+          <div key={item.id}>
+            <h3>{item.title}</h3>
+            <span>{item.body}</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 };
-
-{
-  /* <Popover
-        open={open}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-        transformOrigin={{
-          vertical: "top",
-          horizontal: "left",
-        }}
-        anchorEl={anchorE1}
-        onClose={handleClose}
-      >
-        <div
-          style={{
-            padding: 5,
-          }}
-        >
-          <h5>Neel Modi</h5>
-          <LogoutIcon onClick={onHomebtnClick} />
-        </div>
-      </Popover>
-    </div>
-  ); */
-}
